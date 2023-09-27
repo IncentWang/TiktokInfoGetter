@@ -4,10 +4,12 @@ import time
 import sys
 import threading
 from datetime import datetime
+import os
 
 TARGET = "https://www.tiktok.com/api/user/list/"
 DEPTH_LIMIT = 1
 SEND_REQUEST_LIMIT = 10
+FOLDER_NAME = ""
 
 def mergeDict(a: dict, b:dict):
     temp = {}
@@ -24,6 +26,16 @@ class TiktokFollowInfo(threading.Thread):
         self.secUid = ""
         self.url = url
         self.sendCount = 0
+        self.depth_limit = DEPTH_LIMIT
+        self.send_request_limit = SEND_REQUEST_LIMIT
+        self.folder_name = "temp"
+
+        if 'depthLimit' in kwargs:
+            self.depth_limit = kwargs['depthLimit']
+        if 'sendRequestLimit' in kwargs:
+            self.send_request_limit = kwargs['sendRequestLimit']
+        if 'folderName' in kwargs:
+            self.folder_name = kwargs['folderName']
 
         for i in url.split('?', 2)[1].split('&'):
             j = i.split('=')
@@ -70,7 +82,7 @@ class TiktokFollowInfo(threading.Thread):
 
             print(f"[{datetime.now()}][INFO][{self.queryParams['secUid'][-7:]}] Sending number {count} request, maxCursor = {self.queryParams['maxCursor']}, minCursor = {self.queryParams['minCursor']}")
             self.sendCount += 1
-            if self.sendCount > SEND_REQUEST_LIMIT:
+            if self.sendCount > self.send_request_limit:
                 break
 
             response = requests.get(TARGET, params = self.queryParams)
@@ -95,7 +107,9 @@ class TiktokFollowInfo(threading.Thread):
             self.writeToCsv(self.secUid + '_Follower')
     
     def writeToCsv(self, name:str):
-        f = open(name + '.csv', 'w')
+        if not os.path.exists(self.folder_name):
+            os.mkdir(self.folder_name)
+        f = open(self.folder_name + "/" + name + '.csv', 'w')
         f.write(','.join(self.allresponses[0].keys()))
         f.write('\n')
         for i in self.allresponses:

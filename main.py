@@ -1,41 +1,45 @@
 from TiktokFollowInfo import TiktokFollowInfo
 import sys
+import time
 
 if __name__ == '__main__':
     '''
     Usage: main.py "url for the first request" MAX_DEPTH REQUEST_SEND_LIMIT
     '''
+    DEPTH_LIMIT = 0
+    SEND_REQUEST_LIMIT = 10
 
     if len(sys.argv) < 2:
         raise ValueError("Argv count is not correct. Please try again.")
     if len(sys.argv) == 2:
-        TiktokFollowInfo.DEPTH_LIMIT = 0
-        TiktokFollowInfo.SEND_REQUEST_LIMIT = 10
+        DEPTH_LIMIT = 0
+        SEND_REQUEST_LIMIT = 10
     if len(sys.argv) == 3:
-        TiktokFollowInfo.DEPTH_LIMIT = int(sys.argv[2])
-        TiktokFollowInfo.SEND_REQUEST_LIMIT = 10
+        DEPTH_LIMIT = int(sys.argv[2])
+        SEND_REQUEST_LIMIT = 10
     if len(sys.argv) == 4:
-        TiktokFollowInfo.DEPTH_LIMIT = int(sys.argv[2])
-        TiktokFollowInfo.SEND_REQUEST_LIMIT = int(sys.argv[3])
+        DEPTH_LIMIT = int(sys.argv[2])
+        SEND_REQUEST_LIMIT = int(sys.argv[3])
+    FOLDER_NAME = str(int(time.time()))
     
     url = sys.argv[1]
     count = 0
     threadPool = []
-    Parent = TiktokFollowInfo(url, getFollowing = 'false')
+    Parent = TiktokFollowInfo(url, getFollowing = 'false', depthLimit = DEPTH_LIMIT, sendRequestLimit = SEND_REQUEST_LIMIT, folderName = FOLDER_NAME)
     threadPool.append(Parent)
 
-    while count < TiktokFollowInfo.DEPTH_LIMIT:
+    while count < DEPTH_LIMIT:
         for i in threadPool:
             i.start()
         for i in threadPool:
             i.join()
         newPool = []
         count += 1
-        if count >= TiktokFollowInfo.DEPTH_LIMIT:
+        if count >= DEPTH_LIMIT:
             break
 
         for i in threadPool:
             for j in i.allresponses:
-                temp = TiktokFollowInfo(url, getFollowing = 'true', secUid = j['secUid'])
+                temp = TiktokFollowInfo(url, getFollowing = 'true', secUid = j['secUid'], depthLimit = DEPTH_LIMIT, sendRequestLimit = SEND_REQUEST_LIMIT, folderName = FOLDER_NAME)
                 newPool.append(temp)
         threadPool = newPool
