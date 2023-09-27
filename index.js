@@ -4,8 +4,14 @@ const app = express();
 const path = require("path");
 const bodyParser = require("body-parser");
 const spawn = require('child_process').spawn;
+var config = require('./config.json');
 
 router = express.Router();
+
+
+function getTimestampInSeconds () {
+    return Math.floor(Date.now() / 1000).toString();
+  }
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -15,14 +21,19 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '/public/getinfo.html'))
 });
 
+var FOLDER_NAME = getTimestampInSeconds();
+
 app.get('/submit', function(req, res){
     var url = req.query['firstURL'];
     var depth = parseInt(req.query['depth']);
     var requestCount = parseInt(req.query['requestCount']);
-    var worker = spawn('C:/Users/18624/anaconda3/envs/tiktok/python.exe', ['main.py', url, depth, requestCount]);
+    var worker = spawn(config.PythonPath, ['main.py', url, FOLDER_NAME, depth, requestCount]);
     worker.stdout.on('data', (data) => {
         console.log(`${data}`)
     });
+    worker.on('exit', function() {
+        res.download(path.join(__dirname, `${FOLDER_NAME}_archived.zip`));
+    })
     
 });
 
