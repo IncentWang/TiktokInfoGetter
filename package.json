@@ -1,0 +1,14 @@
+{
+  "name": "tiktokinfogetter",
+  "version": "1.0.0",
+  "description": "A simple web-interface which can interact with tiktok-info-getter by IncentWang",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "tiktok"
+  ],
+  "author": "IncentWang",
+  "license": "ISC"
+}
