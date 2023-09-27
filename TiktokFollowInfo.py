@@ -102,13 +102,3 @@ class TiktokFollowInfo(threading.Thread):
             f.write(','.join(str(x) for x in i.values()))
             f.write('\n')
         f.close()
-
-if __name__ == '__main__':
-    if len(sys.argv) > 2:
-        SEND_REQUEST_LIMIT = int(sys.argv[2])
-
-    mainThread = TiktokFollowInfo(sys.argv[1], getFollowing = 'false')
-    mainThread.start()
-    mainThread.join()
-
-    # Post-processing generated file
