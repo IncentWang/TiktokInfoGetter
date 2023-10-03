@@ -55,7 +55,6 @@ if __name__ == '__main__':
                 temp = TiktokFollowInfo(url, getFollowing = 'true', secUid = j['secUid'], depthLimit = DEPTH_LIMIT, sendRequestLimit = SEND_REQUEST_LIMIT, folderName = FOLDER_NAME)
                 future = threadPoolExecutor.submit(temp.getInfo)
                 threadPool.append(future)
-    threadPoolExecutor.close()
-
     # Zip all necessary file into one zip file
     archived = shutil.make_archive(f'{FOLDER_NAME}_archived', 'zip', f'{FOLDER_NAME}/')
+    threadPoolExecutor.close()

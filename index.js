@@ -21,9 +21,9 @@ app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '/public/getinfo.html'))
 });
 
-var FOLDER_NAME = getTimestampInSeconds();
 
 app.get('/submit', function(req, res){
+    var FOLDER_NAME = getTimestampInSeconds();
     var url = req.query['firstURL'];
     var depth = parseInt(req.query['depth']);
     var requestCount = parseInt(req.query['requestCount']);
