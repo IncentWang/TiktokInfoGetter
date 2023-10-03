@@ -87,6 +87,7 @@ class TiktokFollowInfo(threading.Thread):
 
             response = requests.get(TARGET, params = self.queryParams)
         self.cleanData()
+        return self
 
     def cleanData(self):
         if len(self.allresponses) == 0:
