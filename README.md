@@ -14,44 +14,12 @@ This will start a simple server (only one static html file) in localhost:8081 fo
 
 or
 
-`"PythonPathOfTiktokVirtualEnvironment" main.py "URL" "FOLDER_NAME" "DEPTH" "SEND_REQUEST_COUNT"`
+`"PythonPathOfTiktokVirtualEnvironment" main.py "uniqueID" "FOLDER_NAME" "DEPTH" "SEND_REQUEST_COUNT"`
 
-This will call python script directly with four parameters: URL, FOLDER_NAME, DEPTH, and SEND_REQUEST_COUNT. The DEPTH and SEND_REQUEST_COUNT is optional parameters and the first two parameters are needed to run this script correctly.
+This will call python script directly with four parameters: uniqueID, FOLDER_NAME, DEPTH, and SEND_REQUEST_COUNT. The DEPTH and SEND_REQUEST_COUNT is optional parameters and the first two parameters are needed to run this script correctly.
 
 ### Parameters
-In current Version, to run the script correctly, we will need four parameters: URL, FOLDER_NAME, DEPTH, and REQUEST_SEND_COUNT.
-
-Getting url is tricky and difficult in this project. We hope this will be done automatically in the future.
-
-#### How to get URL?
-First, you need to find the homepage of the account you want to get follower information manually.
-
-For example, in this example, we want to get follower information of [@Symposia.live.game](https://www.tiktok.com/@symposia.live.game).
-
-You should be in this webpage for further actions:
-
-![Tiktok account info page](/ReadmeSrc/InfoPage.png)
-
-Then in Chrome, press F12 to open DevTools:
-
-![Account Info with DevTool](/ReadmeSrc/InfoPageWithDevTool.png)
-
-Then switch to Network tab:
-![DevTool Network Tab](/ReadmeSrc/NetworkTab.png)
-
-Apply Search Filter with keyword `WebIdLastTime`:
-![WebIdLastTime Filter](/ReadmeSrc/WebIdLastTime.png)
-
-Then click Followers Button:
-![Click Followers Button](/ReadmeSrc/ClickFollowersButton.png)
-
-At this point, you may see 0 or more web request in devtool, don't worry. Then scroll down the pop-up followers window to make Ajax send a new request:
-![Scroll Down Pop-up Window until new request appears](/ReadmeSrc/FutherInstruction.png)
-
-Then click the new request and select "Headers" tab, you will see the url we will use:
-![See URL](/ReadmeSrc/SeeUrl.png)
-
-Copy and paste this as either Command Line arguments or webform value, and you are ready-to-go!
+In current Version, to run the script correctly, we will need four parameters: uniqueID, FOLDER_NAME, DEPTH, and REQUEST_SEND_COUNT.
 
 #### FOLDER_NAME
 I recommand to use Unix Timestamp of the starting time of the task as the FOLDER_NAME. At the end of task, our script will generate a `FOLDER_NAME_archived.zip` file to download or access. For further scructure of generated file, please see more detailed information below.
@@ -94,7 +62,85 @@ Contains main algorithm to send and parse request and response from tiktok serve
 The entry point of the program.
 
 ### config.json
-This file is not in git repository, but it is needed to start `index.js`. For current version, only one field needed in `config.json` : `"PythonPath"`. This one should be exact path to python executable file in `tiktok` conda virtual environment.
+This file is not in git repository, but it is needed to start `index.js`. 
+
+We need those field to make sure info getter is working properly:
+
+`Pyhonpath` : Python exectuable in `tiktok` conda environment.
+
+`MaxThreadCount` : Max concurrent thread count. To save CPU and RAM resource, we recommend to set it as `NumofCPUs + 4` according to python official document. One thread may cause `20 MB` ram usage, if info getter crashed when running, it may caused by memory limit excceed.
+
+`QueryParams` : This is the original url query string dictionary we need to use. We found one url can be reused up to unlimited times, and this is how we done the automatically generation of url using uniqueID. However, for the tiktok signature, X-bogus, and tiktok login logic, we have not find a solution yet. So you need to get one url for all further using manually. The method we use to find URL is at below.
+
+Here is the sample of the QueryParams:
+```json
+    "QueryParams" : {
+        "WebIdLastTime":"some_value",
+        "aid":"1988",
+        "app_language":"en",
+        "app_name":"tiktok_web",
+        "browser_language":"en-US",
+        "browser_name":"Mozilla",
+        "browser_online":"true",
+        "browser_platform":"Win32",
+        "browser_version":"5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+        "channel":"tiktok_web",
+        "cookie_enabled":"true",
+        "count":"30",
+        "device_id":"some_value",
+        "device_platform":"web_pc",
+        "focus_state":"false",
+        "from_page":"user",
+        "history_len":"3",
+        "is_fullscreen":"false",
+        "is_page_visible":"true",
+        "maxCursor":"some_value",
+        "minCursor":"some_value",
+        "os":"windows",
+        "priority_region":"US",
+        "referer":"",
+        "region":"US",
+        "scene":"67",
+        "screen_height":"1440",
+        "screen_width":"2560",
+        "secUid":"some_value",
+        "tz_name":"America/Los_Angeles",
+        "webcast_language":"en",
+        "msToken":"some_value",
+        "X-Bogus":"some_value",
+        "_signature":"some_value"
+    }
+```
+
+#### How to get URL?
+First, you need to find the homepage of the account you want to get follower information manually.
+
+For example, in this example, we want to get follower information of [@Symposia.live.game](https://www.tiktok.com/@symposia.live.game).
+
+You should be in this webpage for further actions:
+
+![Tiktok account info page](/ReadmeSrc/InfoPage.png)
+
+Then in Chrome, press F12 to open DevTools:
+
+![Account Info with DevTool](/ReadmeSrc/InfoPageWithDevTool.png)
+
+Then switch to Network tab:
+![DevTool Network Tab](/ReadmeSrc/NetworkTab.png)
+
+Apply Search Filter with keyword `WebIdLastTime`:
+![WebIdLastTime Filter](/ReadmeSrc/WebIdLastTime.png)
+
+Then click Followers Button:
+![Click Followers Button](/ReadmeSrc/ClickFollowersButton.png)
+
+At this point, you may see 0 or more web request in devtool, don't worry. Then scroll down the pop-up followers window to make Ajax send a new request:
+![Scroll Down Pop-up Window until new request appears](/ReadmeSrc/FutherInstruction.png)
+
+Then click the new request and select "Headers" tab, you will see the url we will use:
+![See URL](/ReadmeSrc/SeeUrl.png)
+
+Then parse the query string in this URL and add it into our `config.json` file, we are ready-to-go!
 
 ### env.yml
 Conda virtual environment config file. use `Conda env create -f env.yml` to create `tiktok` conda virtual envionment.

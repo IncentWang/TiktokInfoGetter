@@ -24,10 +24,10 @@ app.get('/', function(req, res) {
 
 app.get('/submit', function(req, res){
     var FOLDER_NAME = getTimestampInSeconds();
-    var url = req.query['firstURL'];
+    var uniqueID = req.query['uniqueID'];
     var depth = parseInt(req.query['depth']);
     var requestCount = parseInt(req.query['requestCount']);
-    var worker = spawn(config.PythonPath, ['main.py', url, FOLDER_NAME, depth, requestCount]);
+    var worker = spawn(config.PythonPath, ['main.py', uniqueID, FOLDER_NAME, depth, requestCount]);
     worker.stdout.on('data', (data) => {
         console.log(`${data}`)
     });

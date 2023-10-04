@@ -1,14 +1,16 @@
 from TiktokFollowInfo import TiktokFollowInfo
+from GetUserInfo import GetUserInfo
 import sys
 import time
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 import json
+from urllib.parse import urlencode
 
 if __name__ == '__main__':
     '''
-    Usage: main.py "url for the first request" unix timestamp MAX_DEPTH REQUEST_SEND_LIMIT
+    Usage: main.py unique id Depth_limit send_request_limit Folder_name
     '''
     DEPTH_LIMIT = 0
     SEND_REQUEST_LIMIT = 10
@@ -29,13 +31,19 @@ if __name__ == '__main__':
         DEPTH_LIMIT = int(sys.argv[3])
         SEND_REQUEST_LIMIT = int(sys.argv[4])
     
-    url = sys.argv[1]
+    uniqueid = sys.argv[1]
+    with open("config.json") as f:
+        jsonData = json.load(f)
+    queryParams = jsonData["QueryParams"]
+    parent = GetUserInfo(uniqueid)
+    parent.getInfo()
+    queryParams['secUid'] = parent.response['secuid']
     count = 0
-    with open("config.json") as config:
-        configFile = json.load(config)
-    threadPoolExecutor = ThreadPoolExecutor(configFile["MaxThreadCount"])
-    Parent = TiktokFollowInfo(url, getFollowing = 'false', depthLimit = DEPTH_LIMIT, sendRequestLimit = SEND_REQUEST_LIMIT, folderName = FOLDER_NAME)
-    future = threadPoolExecutor.submit(Parent.getInfo)
+    threadPoolExecutor = ThreadPoolExecutor(jsonData['MaxThreadCount'])
+    url = "https://www.tiktok.com/api/user/list/?" + urlencode(queryParams)
+    
+    firstRequest = TiktokFollowInfo(url, getFollowing = 'false', depthLimit = DEPTH_LIMIT, sendRequestLimit = SEND_REQUEST_LIMIT, folderName = FOLDER_NAME)
+    future = threadPoolExecutor.submit(firstRequest.getInfo)
     threadPool = []
     threadPool.append(future)
 
@@ -57,4 +65,4 @@ if __name__ == '__main__':
                 threadPool.append(future)
     # Zip all necessary file into one zip file
     archived = shutil.make_archive(f'{FOLDER_NAME}_archived', 'zip', f'{FOLDER_NAME}/')
-    threadPoolExecutor.close()
+    threadPoolExecutor.shutdown()
