@@ -7,31 +7,37 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 import json
 from urllib.parse import urlencode
+import argparse
 
 if __name__ == '__main__':
     '''
     Usage: main.py unique id Depth_limit send_request_limit Folder_name
     '''
-    DEPTH_LIMIT = 0
-    SEND_REQUEST_LIMIT = 10
-    FOLDER_NAME = ""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("uniqueid", help="Unique id of influencer you want to find follower information")
+    parser.add_argument("foldername", help="Folder name the program will use to store data.")
+    parser.add_argument("--depth", type=int, help="depth of searching, 1 means only get followers info, 2 means get followers info and their following info")
+    parser.add_argument("--requestlimit", type=int, help="Max count of sending requests, one request will fetch 30 records.")
+    parser.add_argument("--d", help="Contain this flag to store results to database")
 
-    if len(sys.argv) < 3:
-        raise ValueError("Argv count is not correct. Please try again.")
-    if len(sys.argv) == 3:
-        DEPTH_LIMIT = 0
-        SEND_REQUEST_LIMIT = 10
-        FOLDER_NAME = sys.argv[2]
-    if len(sys.argv) == 4:
-        FOLDER_NAME = sys.argv[2]
-        DEPTH_LIMIT = int(sys.argv[3])
-        SEND_REQUEST_LIMIT = 10
-    if len(sys.argv) == 5:
-        FOLDER_NAME = sys.argv[2]
-        DEPTH_LIMIT = int(sys.argv[3])
-        SEND_REQUEST_LIMIT = int(sys.argv[4])
+    args = parser.parse_args()
+
+    DEPTH_LIMIT = 1
+    SEND_REQUEST_LIMIT = 10
+    DATABASE = False
+
+    FOLDER_NAME = args.foldername
+    uniqueid = args.uniqueid
+
+    if args.depth:
+        DEPTH_LIMIT = args.depth
+
+    if args.requestlimit:
+        SEND_REQUEST_LIMIT = args.requestlimit
     
-    uniqueid = sys.argv[1]
+    if args.d:
+        DATABASE = True
+
     with open("config.json") as f:
         jsonData = json.load(f)
     queryParams = jsonData["QueryParams"]
