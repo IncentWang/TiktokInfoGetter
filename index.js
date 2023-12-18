@@ -27,7 +27,7 @@ app.get('/submit', function(req, res){
     var uniqueID = req.query['uniqueID'];
     var depth = parseInt(req.query['depth']);
     var requestCount = parseInt(req.query['requestCount']);
-    var worker = spawn(config.PythonPath, ['main.py', uniqueID, FOLDER_NAME, depth, requestCount]);
+    var worker = spawn(config.PythonPath, ['main.py', "--depth", depth, "--requestlimit", requestCount, uniqueID, FOLDER_NAME]);
     worker.stdout.on('data', (data) => {
         console.log(`${data}`)
     });
